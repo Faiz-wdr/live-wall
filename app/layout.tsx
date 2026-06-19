@@ -4,6 +4,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'LiveWall — Audience Engagement Platform',
   description: 'A premium realtime audience engagement wall for events and arts festivals.',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 };
 
 export default function RootLayout({

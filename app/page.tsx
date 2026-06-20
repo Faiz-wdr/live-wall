@@ -751,16 +751,6 @@ export default function Home() {
         </AnimatePresence>
       </div>
 
-      {/* Floating Action Button (Sticky Bottom on Mobile / Floating center on Desktop) */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 pointer-events-auto">
-        <button
-          onClick={handleOpenAddPost}
-          className="px-7 py-4 rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary-dark hover:to-accent text-white font-extrabold text-sm shadow-xl shadow-primary/20 hover:shadow-primary/45 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex items-center gap-2"
-        >
-          <span className="text-lg">+</span> Add Post
-        </button>
-      </div>
-
       {/* MULTI-STEP CREATION DIALOG (MODAL OVERLAY) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4">

@@ -7,7 +7,7 @@ import { Post } from '@/hooks/useRealtimePosts';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { adminUpdatePostStatus, adminDeletePost, adminCreateAnnouncement, adminUpdatePost } from '@/app/admin/actions';
+import { adminUpdatePostStatus, adminDeletePost, adminCreateAnnouncement, adminUpdatePost, adminDeleteExpiredPosts } from '@/app/admin/actions';
 
 const announcementSchema = z.object({
   message: z.string().min(1, 'Announcement message is required').max(280, 'Cannot exceed 280 characters'),
@@ -68,6 +68,9 @@ export default function AdminPostsPage() {
   const fetchAllPosts = async () => {
     try {
       setLoading(true);
+      // Clean up database first
+      await adminDeleteExpiredPosts();
+
       const { data, error: fetchErr } = await supabase
         .from('posts')
         .select('*')
@@ -274,7 +277,13 @@ export default function AdminPostsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {posts.map((post) => (
+                {posts
+                  .filter((post) => {
+                    if (post.post_type === 'announcement') return true;
+                    if (!post.expires_at) return true;
+                    return new Date(post.expires_at).getTime() > Date.now();
+                  })
+                  .map((post) => (
                   <tr key={post.id} className="hover:bg-white/2">
                     {/* Preview Image */}
                     <td className="py-4 pr-4">

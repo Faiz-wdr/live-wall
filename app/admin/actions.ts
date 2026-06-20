@@ -134,3 +134,20 @@ export async function adminUpdatePost(id: string, updates: { message?: string; d
   }
 }
 
+// Action: Delete all expired posts (except announcements)
+export async function adminDeleteExpiredPosts() {
+  await verifyAdminAuth();
+  try {
+    const { error } = await getSupabaseAdminClient()
+      .from('posts')
+      .delete()
+      .lt('expires_at', new Date().toISOString())
+      .neq('post_type', 'announcement');
+
+    if (error) throw error;
+    return { error: null };
+  } catch (err: any) {
+    return { error: err.message || 'Failed to delete expired posts' };
+  }
+}
+

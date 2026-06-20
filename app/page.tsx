@@ -49,7 +49,7 @@ export default function Home() {
   const { displayName, isInitialized, saveIdentity } = useUserIdentity();
 
   // Settings
-  const [expiryDuration, setExpiryDuration] = useState<number>(60); // default 60 minutes
+  const [expiryDuration, setExpiryDuration] = useState<number>(5); // default 5 minutes
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
   // Modal States
@@ -311,7 +311,7 @@ export default function Home() {
         if (data) {
           const expiry = data.find((s) => s.key === 'post_expiry_duration');
           if (expiry) {
-            setExpiryDuration(parseInt(expiry.value || '60', 10));
+            setExpiryDuration(parseInt(expiry.value || '5', 10));
           }
         }
       } catch (err) {

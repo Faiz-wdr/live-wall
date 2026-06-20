@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
   } = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      postExpiryDuration: 60,
+      postExpiryDuration: 5,
       maxImageSize: 5,
       enableModeration: false,
     },
@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
         if (data) {
           data.forEach((item) => {
             if (item.key === 'post_expiry_duration') {
-              setValue('postExpiryDuration', parseInt(item.value || '60', 10));
+              setValue('postExpiryDuration', parseInt(item.value || '5', 10));
             }
             if (item.key === 'max_image_size') {
               setValue('maxImageSize', parseInt(item.value || '5', 10));

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRealtimePosts } from '@/hooks/useRealtimePosts';
 import Link from 'next/link';
+import { adminDeleteExpiredPosts } from '@/app/admin/actions';
 
 export default function AdminDashboard() {
   const { posts, loading: postsLoading } = useRealtimePosts();
@@ -15,22 +16,34 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Clean up expired posts from database on mount
+  useEffect(() => {
+    adminDeleteExpiredPosts().catch((err) => console.error('Failed to clean up expired posts', err));
+  }, []);
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {
         setLoading(true);
-        // Query database directly to count total metrics
+        // Query database directly to count total metrics, including expires_at
         const { data, error } = await supabase
           .from('posts')
-          .select('status, post_type');
+          .select('status, post_type, expires_at');
 
         if (error) throw error;
 
+        const now = Date.now();
+        const activeAndValid = data?.filter((p) => {
+          if (p.post_type === 'announcement') return true;
+          if (!p.expires_at) return true;
+          return new Date(p.expires_at).getTime() > now;
+        }) || [];
+
         const totals = {
-          total: data?.length || 0,
-          active: data?.filter((p) => p.status === 'active').length || 0,
-          hidden: data?.filter((p) => p.status === 'hidden').length || 0,
-          announcements: data?.filter((p) => p.post_type === 'announcement').length || 0,
+          total: activeAndValid.length,
+          active: activeAndValid.filter((p) => p.status === 'active').length,
+          hidden: activeAndValid.filter((p) => p.status === 'hidden').length,
+          announcements: activeAndValid.filter((p) => p.post_type === 'announcement').length,
         };
 
         setMetrics(totals);
@@ -149,7 +162,14 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {posts.slice(0, 5).map((post) => (
+                {posts
+                  .filter((post) => {
+                    if (post.post_type === 'announcement') return true;
+                    if (!post.expires_at) return true;
+                    return new Date(post.expires_at).getTime() > Date.now();
+                  })
+                  .slice(0, 5)
+                  .map((post) => (
                   <tr key={post.id} className="hover:bg-white/2">
                     <td className="py-4 text-xs sm:text-sm font-semibold text-accent">
                       {post.display_name}

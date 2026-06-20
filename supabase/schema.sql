@@ -82,7 +82,7 @@ $$ language plpgsql security definer;
 
 -- INSERT DEFAULT SETTINGS
 insert into public.settings (key, value) values
-  ('post_expiry_duration', '60'), -- in minutes
+  ('post_expiry_duration', '5'), -- in minutes
   ('max_image_size', '5'),         -- in MB
   ('enable_moderation', 'false')
 on conflict (key) do nothing;
